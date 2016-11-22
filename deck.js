@@ -1,4 +1,6 @@
 
+
+
 function Card(suit, value) {
   var face;
   if(typeof value == 'number') {
@@ -30,9 +32,13 @@ Card.prototype.toString = function() {
 
 
 function DealingShoe(deckCount) {
-  deckCount = deckCount || 6;
-  this.cardCount = 52 * deckCount;
+  this.deckCount = deckCount || 6;
+  this.cardCount = 52 * this.deckCount;
 
+  this.resuffle();
+}
+
+DealingShoe.prototype.resuffle = fnction() {
   var builder = new Array(this.cardCount);
   var suits = ["Clubs", "Hearts", "Spades", "Diamonds"];
   var faces = [2, 3, 4, 5, 6, 7, 8, 9, 10, {
@@ -68,72 +74,134 @@ function DealingShoe(deckCount) {
 
   this.cards = builder;
   this.position = 0;
-
-  this.cards.forEach(function(card, i) {
-    console.log("%s", card);
-  });
-}
+};
 
 DealingShoe.prototype.next = function() {
-  var card = this.cards[this.position];
-  this.position += 1;
-
-  return card;
-}
-
-
-function canSplit(cards, inSplit) {
-  if(inSplit || cards.length > 2) {
-    return false;
+  if(this.position == this.cards.length) {
+    this.resuffle();
+    return this.next();
   } else {
-    return cards[0].face == cards[1].face;
+    var card = this.cards[this.position];
+    this.position += 1;
+
+    return card;
   }
 }
 
 
-function Hand(cards, otherHand) {
+function makePlayerHand(engineHand) {
+  return {
+    cards: engineHand.cards.concat([]),
+    value: engineHand.value
+  };
+}
+
+function makeTable(players, exclude) {
+  var tbl = [];
+  players.forEach(function(player) {
+    if(!exclude || player != exclude) {
+      tbl.push(player.hand.card.concat([]));
+    }
+  });
+
+  return tbl;
+}
+
+
+function EngineHand() {
+  var cards = [];
+  var _dirty = false;
+  var _value = 0;
+
   Object.defineProperties(this, {
-    otherHand: {
-      get: function() { return otherHand; }
-    },
+    // otherHand: {
+    //   get: function() { return otherHand; }
+    // },
     cards: {
-      get: function() { return cards.concat([]); }
+      get: function() { return cards; }
     },
-    canSplit: {
+
+    push: {
       get: function() {
-        return canSplit(cards, otherHand != null);
+        return function(card) {
+          _dirty = true;
+          cards.push(card);
+        }
       }
     },
+
+    // canSplit: {
+    //   get: function() {
+    //     return canSplit(cards); //, otherHand != null);
+    //   }
+    // },
+
     value: {
       get: function() {
-        var value = 0;
-        var aces = 0;
-        cards.forEach(function(card) {
-          if(card.isAce) {
-            aces += 1;
-          } else {
-            value += card.value;
-          }
-
-          for(var i = 0; i < aces; ++i) {
-            if((value + 11) > 21) {
-              value += 1;
+        if(_dirty) {
+          var value = 0;
+          var aces = 0;
+          cards.forEach(function(card) {
+            if(card.isAce) {
+              aces += 1;
             } else {
-              value += 11;
+              value += card.value;
             }
-          }
-        });
 
-        return value;
+            for(var i = 0; i < aces; ++i) {
+              if((value + 11) > 21) {
+                value += 1;
+              } else {
+                value += 11;
+              }
+            }
+          });
+
+          _value = value;
+          _dirty = false;
+        }
+
+        return _value;
       }
     },
     isBusted: {
       get: function() {
         return this.value > 21;
       }
+    },
+    isBlackjack: {
+      get: function() {
+        return card.length == 2 && this.value == 21;
+      }
     }
   });
 }
 
 
-var deck = new DealingShoe();
+
+function Actions() {
+  Object.defineProperties(this, {
+    stand: {
+      get: function() {
+        return 'stand';
+      }
+    },
+    hit: {
+      get: function() {
+        return 'hit';
+      }
+    }
+    // split: {
+    //   get: function() {
+    //     return 'split';
+    //   }
+    // }
+  });
+}
+
+exports.Actions = Actions;
+exports.DealingShow = DealingShoe;
+exports.EngineHand = EngineHand;
+exports.Card = Card;
+exports.makePlayerHand = makePlayerHand;
+exports.makeTable = makeTable;
