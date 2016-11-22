@@ -2,11 +2,11 @@
 module.exports = {
   name: "<Dealer>",
 
-  processHand: function(hand, dealer, players, actions) {
-    if(hand.value > 16) {
-      actions.stay();
+  step: function(cards, dealerCards, table, actions) {
+    if(hand.value >= 16) {
+      return actions.stay;
     } else {
-      actions.hit();
+      return actions.hit;
     }
   },
 
