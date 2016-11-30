@@ -38,7 +38,7 @@ function DealingShoe(deckCount) {
   this.resuffle();
 }
 
-DealingShoe.prototype.resuffle = fnction() {
+DealingShoe.prototype.resuffle = function() {
   var builder = new Array(this.cardCount);
   var suits = ["Clubs", "Hearts", "Spades", "Diamonds"];
   var faces = [2, 3, 4, 5, 6, 7, 8, 9, 10, {
@@ -55,13 +55,15 @@ DealingShoe.prototype.resuffle = fnction() {
     value: 11
   }];
 
-  for(var a = 0; a < deckCount; ++a) {
+  for(var a = 0; a < this.deckCount; ++a) {
     suits.forEach(function(suit, i) {
       faces.forEach(function(value, j) {
         builder[(a * 52) + (i * 13) + j] = new Card(suit, value);
       });
     });
   }
+
+  var orig = builder.concat([]);
 
   for(var i = 0; i < 1000000; ++i) {
     var src = Math.floor(Math.random() * this.cardCount);
@@ -74,6 +76,32 @@ DealingShoe.prototype.resuffle = fnction() {
 
   this.cards = builder;
   this.position = 0;
+
+  var totalDistance = 0;
+
+  orig.forEach(function(current, i) {
+    var j = i + 1;
+    if(j == orig.length) {
+      return;
+    }
+
+    var next = orig[j];
+    var currentIndex;
+    var nextIndex;
+    builder.forEach(function(card, bldrIndex) {
+      if(card.suit == current.suit && card.face == current.face) {
+        currentIndex = bldrIndex;
+      } else if(card.suit == next.suit && card.face == next.face) {
+        nextIndex = bldrIndex;
+      }
+    });
+
+    totalDistance += Math.abs(nextIndex - currentIndex);
+  });
+
+  console.log("distance: %s", (totalDistance / (orig.length - 1)).toString());
+  console.log("total: %d", totalDistance)
+  console.log("length: %d", orig.length);
 };
 
 DealingShoe.prototype.next = function() {
@@ -92,17 +120,20 @@ DealingShoe.prototype.next = function() {
 function makePlayerHand(engineHand) {
   return {
     cards: engineHand.cards.concat([]),
-    value: engineHand.value
+    value: engineHand.value,
+    toString: function() {
+      return engineHand.toString();
+    }
   };
 }
 
-function makeTable(players, exclude) {
+function makeTable(players, dealerCards) {
   var tbl = [];
   players.forEach(function(player) {
-    if(!exclude || player != exclude) {
-      tbl.push(player.hand.card.concat([]));
-    }
+    tbl.push(player.hand.cards.concat([]));
   });
+
+  tbl = tbl.concat(dealerCards)
 
   return tbl;
 }
@@ -171,11 +202,15 @@ function EngineHand() {
     },
     isBlackjack: {
       get: function() {
-        return card.length == 2 && this.value == 21;
+        return this.cards.length == 2 && this.value == 21;
       }
     }
   });
 }
+
+EngineHand.prototype.toString = function() {
+  return this.cards.join(', ') + ' [' + this.value.toString() + ']';
+};
 
 
 
@@ -200,7 +235,7 @@ function Actions() {
 }
 
 exports.Actions = Actions;
-exports.DealingShow = DealingShoe;
+exports.DealingShoe = DealingShoe;
 exports.EngineHand = EngineHand;
 exports.Card = Card;
 exports.makePlayerHand = makePlayerHand;
