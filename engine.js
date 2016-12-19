@@ -179,7 +179,7 @@ BlackjackEngine.prototype.runGame = function() {
       return hasMoney;
     });
 
-    if(activePlayers.length == 0) {
+    if(activePlayers.length <= 1) {
       logger("all players eliminated");
       break;
     }
@@ -192,15 +192,20 @@ BlackjackEngine.prototype.runGame = function() {
   var standings = players.concat([]);
   standings.sort(function(a, b) {
     // first sort on stats.lastRound
-    if(a.stats.lastRound < b.lastRound) {
+    if(a.stats.lastRound < b.stats.lastRound) {
       return 1;
-    } else if(a.stats.lastRound > b.lastRound) {
+    } else if(a.stats.lastRound > b.stats.lastRound) {
       return -1;
     // Next, sort on remaining cash
-    } else if(a.stats.cash < b.stats.cash) {
+    } else if(a.cash < b.cash) {
       return 1;
-    } else if(a.stats.cash > b.stats.cash) {
+    } else if(a.cash > b.cash) {
       return -1;
+    // Next sort on number of winds
+    } else if(a.stats.wins < b.stats.wins) {
+      return -1;
+    } else if(a.stats.wins > b.stats.wins) {
+      return 1;
     // finally sort on max cash
     } else if(a.stats.maxCash < b.stats.maxCash) {
       return 1;
