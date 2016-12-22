@@ -21,7 +21,7 @@ function Card(suit, value) {
       get: function() { return face; }
     },
     isAce: {
-      get: function() { return face == "Ace"; }
+      get: function() { return value == 11; } // == "Ace"; }
     }
   });
 }
@@ -98,10 +98,6 @@ DealingShoe.prototype.resuffle = function() {
 
     totalDistance += Math.abs(nextIndex - currentIndex);
   });
-
-  console.log("distance: %s", (totalDistance / (orig.length - 1)).toString());
-  console.log("total: %d", totalDistance)
-  console.log("length: %d", orig.length);
 };
 
 DealingShoe.prototype.next = function() {
@@ -180,12 +176,13 @@ function EngineHand() {
             }
           });
 
-          for(var i = 0; i < aces; ++i) {
-            if((value + 11) > 21) {
-              value += 1;
-            } else {
-              value += 11;
+          if(aces) {
+            var useAs11 = Math.floor((21 - value) / 11);
+            if(useAs11 < 0) {
+              useAs11 = 0;
             }
+
+            value += (useAs11 * 11) + (aces - useAs11);
           }
 
           _value = value;
