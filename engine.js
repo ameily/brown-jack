@@ -70,7 +70,7 @@ BlackjackEngine.prototype.runRound = function(dealer, players, shoe) {
       while(!done) {
         // Let the profile choose what action to perform
         player.log("shows %s", player.hand);
-        action = player.getAction(player.bet, table, dealer.hand[1], actions);
+        action = player.getAction(player.bet, table, dealer.hand.cards[1], actions);
         if(action == 'stand') {
           // Player wants to stand; finish player's round
           done = true;
@@ -142,7 +142,7 @@ BlackjackEngine.prototype.runRound = function(dealer, players, shoe) {
 
     player.roundEnd(result, player.bet, winnings, makeTable(players, dealer.hand.cards));
 
-    player.log("end of round cash: %d", this.cash, winnings, this.hand);
+    player.log("end of round cash: %d", player.cash);
   });
 };
 

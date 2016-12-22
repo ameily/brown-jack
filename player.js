@@ -142,7 +142,7 @@ Player.prototype.getAction = function(bet, table, dealerCard, actions) {
 
   try {
     action = this.profile.getAction(
-      makePlayerHand(this.hand), bet, table, dealerCard, actions
+      makePlayerHand(this.hand), bet, dealerCard, table, actions
     );
   } catch(e) {
     this.log("error: getAction() threw exception: %s", e);
@@ -188,7 +188,7 @@ Player.prototype.roundBegin = function() {
 
 Player.prototype.roundEnd = function(result, bet, winnings, table) {
   try {
-    this.profile.onRoundEnd(result, makePlayerHand(this.hand), this.cash, bet, winnings, table);
+    this.profile.onRoundEnd(result, makePlayerHand(this.hand), this.cash, winnings, table);
   } catch(e) {
     //TODO
   }
