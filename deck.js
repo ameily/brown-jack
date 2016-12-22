@@ -178,15 +178,15 @@ function EngineHand() {
             } else {
               value += card.value;
             }
-
-            for(var i = 0; i < aces; ++i) {
-              if((value + 11) > 21) {
-                value += 1;
-              } else {
-                value += 11;
-              }
-            }
           });
+
+          for(var i = 0; i < aces; ++i) {
+            if((value + 11) > 21) {
+              value += 1;
+            } else {
+              value += 11;
+            }
+          }
 
           _value = value;
           _dirty = false;
